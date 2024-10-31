@@ -5,10 +5,17 @@ import java.util.Scanner;
 
 public class Cd {
     
+    private String currentDirectory;
+    
+    public Cd() {
+        this.currentDirectory = System.getProperty("user.dir");
+    }
+    
     public String cd(String s){
-        File directory = new File(s);
+        File directory = new File(currentDirectory,s);
         if(directory.exists() && directory.isDirectory()){
-           return ("The current directory : " + directory.getAbsolutePath());
+           currentDirectory = directory.getAbsolutePath();
+           return currentDirectory;
         }
         else{
             return("Directory does not exist");
@@ -20,8 +27,12 @@ public class Cd {
         Cd command = new Cd();
         
         System.out.println("Enter the name of the folder");
-        System.out.println(command.cd(input.next()));
-        
-       
+        while(true){
+            String in = input.next();
+            if("exit".equals(in)){
+                break;
+            }
+            System.out.println(command.cd(in));
+        }
     }
 }
