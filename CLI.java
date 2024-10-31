@@ -32,14 +32,36 @@ public class CLI
                 case "ls":
                     if (command.length == 1)
                     {
-                        Commands.ls();
+                        String[] files = Commands.ls();
+                        for (String file : files)
+                        {
+                            System.out.print(file);
+                            System.out.print("  ");
+                        }
+                        System.out.print('\n');
                     }
                     else
                     {
                         if (command[1].equals("-a"))
-                            Commands.lsA();
+                        {
+                            String[] files = Commands.lsA();
+                            for (String file : files)
+                            {
+                                System.out.print(file);
+                                System.out.print("  ");
+                            }
+                            System.out.print('\n');
+                        }
                         else if (command[1].equals("-r"))
-                            Commands.lsR();
+                        {
+                            String[] files = Commands.lsR();
+                            for (String file : files)
+                            {
+                                System.out.print(file);
+                                System.out.print("  ");
+                            }
+                            System.out.print('\n');
+                        }
                         else
                             System.out.println("Unknown command");
                     }
