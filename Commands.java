@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.io.*;
@@ -15,8 +16,8 @@ public class Commands
 
     public static void cd(String directory)
     {
-        File dir = new File(directory);
-        if(dir.exists() && dir.isDirectory())
+        File dir = new File(System.getProperty("user.dir"), directory);
+        if (dir.exists() && dir.isDirectory())
             System.setProperty("user.dir", dir.getAbsolutePath());
         else
             System.out.println("Directory does not exist");
@@ -67,7 +68,7 @@ public class Commands
     {
         for (int i = 1; i < directories.length; i++)
         {
-            File dir = new File(directories[i]);
+            File dir = new File(System.getProperty("user.dir"), directories[i]);
             if (!dir.exists())
             {
                 if (dir.mkdirs())
@@ -84,7 +85,7 @@ public class Commands
     {
         for (int i = 1; i < directories.length; i++)
         {
-            File dir = new File(directories[i]);
+            File dir = new File(System.getProperty("user.dir"), directories[i]);
             if (dir.exists())
             {
                 if (dir.delete())
@@ -101,7 +102,7 @@ public class Commands
     {
         for (int i = 1; i < files.length; i++)
         {
-            File file = new File(files[i]);
+            File file = new File(System.getProperty("user.dir"), files[i]);
             if (file.createNewFile())
                 System.out.println("File created successfully");
             else
@@ -109,7 +110,7 @@ public class Commands
         }
     }
 
-    public static void mv(String[] files) throws IOException
+    public static void mv(String[] files)
     {
         Path movedFile = Paths.get(files[1]);
         Path targetFile = Paths.get(files[2]);
@@ -117,15 +118,22 @@ public class Commands
         {
             System.out.println("File does not exist");
         }
-        else if (!Files.exists(targetFile))
+        if (!targetFile.isAbsolute())
+        {
+            targetFile = Paths.get(Paths.get("").toAbsolutePath().toString(), files[2]);
+        }
+        if (Files.isDirectory(targetFile))
+        {
+            targetFile = targetFile.resolve(movedFile.getFileName());
+        }
+        try
         {
             Files.move(movedFile, targetFile,StandardCopyOption.REPLACE_EXISTING);
             System.out.println("File moved successfully");
         }
-        else
+        catch (IOException e)
         {
-            Files.move(movedFile, targetFile);
-            System.out.println("File moved successfully");
+            System.out.println("Error moving file");
         }
     }
 
@@ -133,7 +141,7 @@ public class Commands
     {
         for (int i = 1; i < files.length; i++)
         {
-            File file = new File(files[i]);
+            File file = new File(System.getProperty("user.dir"), files[i]);
             if (file.exists())
             {
                 if (file.delete())
@@ -206,7 +214,52 @@ public class Commands
         }
     }
 
+    public static void sort(String file)
+    {
+        List <String> lines = new ArrayList <>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file)))
+        {
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                lines.add(line);
+            }
+            Collections.sort(lines);
+            for (String l : lines)
+                System.out.println(l);
+        }
+        catch (IOException e)
+        {
+            System.out.println("Could not sort the file: " + e.getMessage());
+        }
+    }
 
+    public static void uniq(String file)
+    {
+        List <String> lines = new ArrayList <>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file)))
+        {
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                lines.add(line);
+            }
+            List <String> uniqueLines = new ArrayList <>();
+            for (int i = 0; i < lines.size(); i++)
+            {
+                if (i > 0 && !lines.get(i).equals(lines.get(i - 1)))
+                    uniqueLines.add(lines.get(i));
+                else if (i == 0)
+                    uniqueLines.add(lines.get(i));
+            }
+            for (String l : uniqueLines)
+                System.out.println(l);
+        }
+        catch (IOException e)
+        {
+            System.out.println("Could not delete duplicates in the file: " + e.getMessage());
+        }
+    }
 
     public static void help()
     {
@@ -222,6 +275,8 @@ public class Commands
         System.out.println("cat <file>:          Displays contents of a file.");
         System.out.println("> <file>:            Redirects output to a file (overwrite).");
         System.out.println(">> <file>:           Redirects output to a file (append).");
+        System.out.println("sort <file>:         Sorts the contents of a file.");
+        System.out.println("uniq <file>:         Deletes adjacent duplicates in a file.");
         System.out.println("|:                   Pipe operator.");
         System.out.println("help:                Displays this help message.");
         System.out.println("exit:                Exits the CLI.");
