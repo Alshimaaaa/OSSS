@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.io.*;
 
@@ -20,49 +22,45 @@ public class Commands
             System.out.println("Directory does not exist");
     }
 
-    public static void ls()
+    public static String[] ls()
     {
         File dir = new File(System.getProperty("user.dir"));
         File[] files = dir.listFiles();
         assert files != null;
+        List <String> fileNames = new ArrayList <>();
         for (File file : files)
         {
             if (!file.isHidden())
-            {
-                System.out.print(file.getName());
-                System.out.print("  ");
-            }
+                fileNames.add(file.getName());
         }
-        System.out.print('\n');
+        return fileNames.toArray(new String[0]);
     }
 
-    public static void lsA()
+    public static String[] lsA()
     {
         File dir = new File(System.getProperty("user.dir"));
         File[] files = dir.listFiles();
         assert files != null;
-        for (File file : files)
+        String[] fileNames = new String[files.length];
+        for(int i = 0; i < files.length; i++)
         {
-            System.out.print(file.getName());
-            System.out.print("  ");
+            fileNames[i] = files[i].getName();
         }
-        System.out.print('\n');
+        return fileNames;
     }
 
-    public static void lsR()
+    public static String[] lsR()
     {
         File dir = new File(System.getProperty("user.dir"));
         File[] files = dir.listFiles();
         assert files != null;
+        List <String> fileNames = new ArrayList <>();
         for (int i = files.length-1; i > -1; i--)
         {
             if (!files[i].isHidden())
-            {
-                System.out.print(files[i].getName());
-                System.out.print("  ");
-            }
+                fileNames.add(files[i].getName());
         }
-        System.out.print('\n');
+        return fileNames.toArray(new String[0]);
     }
 
     public static void mkdir(String[] directories)
@@ -139,12 +137,12 @@ public class Commands
             if (file.exists())
             {
                 if (file.delete())
-                    System.out.println("Directory deleted successfully");
+                    System.out.println("File deleted successfully");
                 else
-                    System.out.println("Error deleting directory");
+                    System.out.println("Error deleting file");
             }
             else
-                System.out.println("Directory does not exist");
+                System.out.println("File does not exist");
         }
     }
 
@@ -207,6 +205,8 @@ public class Commands
             System.out.println("Could not write into file: " + e.getMessage());
         }
     }
+
+
 
     public static void help()
     {
