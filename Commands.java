@@ -214,7 +214,7 @@ public class Commands
         }
     }
 
-    public static void sort(String file)
+    public static String[] sort(String file)
     {
         List <String> lines = new ArrayList <>();
         try (BufferedReader reader = new BufferedReader(new FileReader(file)))
@@ -225,39 +225,40 @@ public class Commands
                 lines.add(line);
             }
             Collections.sort(lines);
-            for (String l : lines)
-                System.out.println(l);
+            return lines.toArray(new String[0]);
         }
         catch (IOException e)
         {
-            System.out.println("Could not sort the file: " + e.getMessage());
+            return new String[]{"Could not sort the file: " + e.getMessage()};
         }
     }
 
-    public static void uniq(String file)
+    public static void uniq(String[] lines)
     {
-        List <String> lines = new ArrayList <>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file)))
+        List <String> uniqueLines = new ArrayList <>();
+        for (int i = 0; i < lines.length; i++)
         {
-            String line;
-            while ((line = reader.readLine()) != null)
-            {
-                lines.add(line);
-            }
-            List <String> uniqueLines = new ArrayList <>();
-            for (int i = 0; i < lines.size(); i++)
-            {
-                if (i > 0 && !lines.get(i).equals(lines.get(i - 1)))
-                    uniqueLines.add(lines.get(i));
-                else if (i == 0)
-                    uniqueLines.add(lines.get(i));
-            }
-            for (String l : uniqueLines)
-                System.out.println(l);
+            if (i > 0 && !lines[i].equals(lines[i - 1]))
+                uniqueLines.add(lines[i]);
+            else if (i == 0)
+                uniqueLines.add(lines[i]);
         }
-        catch (IOException e)
+        for (String line : uniqueLines)
+            System.out.println(line);
+    }
+
+    public static void pipe(String[] commands)
+    {
+        String firstCommand = commands[0].trim();
+        String secondCommand = commands[1].trim();
+        if (firstCommand.startsWith("sort"))
         {
-            System.out.println("Could not delete duplicates in the file: " + e.getMessage());
+            String fileName = firstCommand.split(" ")[1];
+            String[] sortedOutput = Commands.sort(fileName);
+            if (secondCommand.equals("uniq"))
+            {
+                Commands.uniq(sortedOutput);
+            }
         }
     }
 
@@ -276,7 +277,7 @@ public class Commands
         System.out.println("> <file>:            Redirects output to a file (overwrite).");
         System.out.println(">> <file>:           Redirects output to a file (append).");
         System.out.println("sort <file>:         Sorts the contents of a file.");
-        System.out.println("uniq <file>:         Deletes adjacent duplicates in a file.");
+        System.out.println("uniq:                Deletes adjacent duplicates in a file.");
         System.out.println("|:                   Pipe operator.");
         System.out.println("help:                Displays this help message.");
         System.out.println("exit:                Exits the CLI.");
