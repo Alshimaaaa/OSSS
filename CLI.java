@@ -23,10 +23,7 @@ public class CLI
                     break;
 
                 case "cd":
-                    if (command.length > 1)
-                        Commands.cd(command[1]);
-                    else
-                        System.out.println("No directory specified");
+                    Commands.cd(command[1]);
                     break;
 
                 case "ls":
@@ -97,6 +94,14 @@ public class CLI
                         Commands.catAppend(command[1]);
                     else
                         Commands.cat(command);
+                    break;
+
+                case "sort":
+                    Commands.sort(command[1]);
+                    break;
+
+                case "uniq":
+                    Commands.uniq(command[1]);
                     break;
 
                 case "help":
