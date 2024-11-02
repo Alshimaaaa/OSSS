@@ -26,11 +26,14 @@ public class CLI
                 switch (command[0])
                 {
                     case "pwd":
-                        Commands.pwd();
+                        System.out.println(Commands.pwd());
                         break;
 
                     case "cd":
-                        Commands.cd(command[1]);
+                        if (command.length > 1)
+                            Commands.cd(command[1]);
+                        else
+                            System.out.println("No directory specified");
                         break;
 
                     case "ls":
@@ -95,9 +98,9 @@ public class CLI
                         break;
 
                     case "cat":
-                        if (command[2].equals(">"))
+                        if (command.length > 2 && command[2].equals(">"))
                             Commands.catWrite(command[1]);
-                        else if (command[2].equals(">>"))
+                        else if (command.length > 2 && command[2].equals(">>"))
                             Commands.catAppend(command[1]);
                         else
                             Commands.cat(command);
