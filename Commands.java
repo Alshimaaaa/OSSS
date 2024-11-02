@@ -9,9 +9,9 @@ import java.io.*;
 
 public class Commands
 {
-    public static void pwd()
+    public static String pwd()
     {
-        System.out.println(System.getProperty("user.dir"));
+        return System.getProperty("user.dir");
     }
 
     public static void cd(String directory)
@@ -117,6 +117,7 @@ public class Commands
         if (!Files.exists(movedFile))
         {
             System.out.println("File does not exist");
+            return;
         }
         if (!targetFile.isAbsolute())
         {
@@ -186,7 +187,6 @@ public class Commands
                 bw.write(line);
                 bw.newLine();
             }
-            sc.close();
         }
         catch (IOException e)
         {
@@ -206,7 +206,6 @@ public class Commands
                 bw.write(line);
                 bw.newLine();
             }
-            sc.close();
         }
         catch (IOException e)
         {
