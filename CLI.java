@@ -98,18 +98,12 @@ public class CLI
                         break;
 
                     case "cat":
-                        if (command.length > 2 && command[2].equals(">"))
-                            Commands.catWrite(command[1]);
-                        else if (command.length > 2 && command[2].equals(">>"))
-                            Commands.catAppend(command[1]);
+                        if (command.length > 2 && command[1].equals(">"))
+                            Commands.catWrite(command[2]);
+                        else if (command.length > 2 && command[1].equals(">>"))
+                            Commands.catAppend(command[2]);
                         else
                             Commands.cat(command);
-                        break;
-
-                    case "sort":
-                        String[] lines = Commands.sort(command[1]);
-                        for (String line : lines)
-                            System.out.println(line);
                         break;
 
                     case "help":
