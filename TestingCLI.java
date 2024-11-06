@@ -2,7 +2,6 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestingCLI
@@ -77,13 +76,17 @@ public class TestingCLI
     @Test
     public void testMv() throws IOException
     {
-        Path targetDir = Files.createTempDirectory("targetDir");
-        Path sourceFile = Files.createTempFile("source", ".txt");
-        Path targetFile = targetDir.resolve(sourceFile.getFileName());
-        String[] files = {"mv", sourceFile.toString(), targetDir.toString()};
+        File targetDir = new File("targetDir");
+        targetDir.mkdir();
+        File sourceFile = new File("sourceFile.txt");
+        sourceFile.createNewFile();
+        Path targetFile = targetDir.toPath().resolve(sourceFile.toPath().getFileName());
+        String[] files = {"mv", "sourceFile.txt", "targetDir"};
         Commands.mv(files);
-        assertFalse(Files.exists(sourceFile));
+        assertFalse(sourceFile.exists());
         assertTrue(Files.exists(targetFile));
+        targetFile.toFile().delete();
+        targetDir.delete();
     }
 
     @Test
@@ -108,7 +111,7 @@ public class TestingCLI
         String[] files = {"cat", tempFile.getAbsolutePath()};
         Commands.cat(files);
         assertTrue(outputStream.toString().contains("to be checked if it exists in the output of cat function\r\n"));
-        tempFile.delete();
+        tempFile.deleteOnExit();
     }
 
     @Test
@@ -149,6 +152,9 @@ public class TestingCLI
     @Test
     public void testPipe()
     {
-        
+        String[] input = {"ls ", " cat > testFile.txt"};
+        Commands.pipe(input);
+        File outputFile = new File("testFile.txt");
+        assertTrue(outputFile.exists() && outputFile.length() > 0);
     }
 }
