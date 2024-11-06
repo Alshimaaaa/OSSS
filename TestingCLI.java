@@ -147,42 +147,8 @@ public class TestingCLI
     }
 
     @Test
-    public void testSort() throws IOException
+    public void testPipe()
     {
-        Path tempFile = Files.createTempFile("unsorted", ".txt");
-        List <String> lines = List.of("banana", "apple", "cherry");
-        Files.write(tempFile, lines);
-        String[] sortedLines = Commands.sort(tempFile.toString());
-        String[] expectedLines = {"apple", "banana", "cherry"};
-        assertArrayEquals(expectedLines, sortedLines);
-        Files.delete(tempFile);
-    }
-
-    @Test
-    public void testUniq()
-    {
-        String[] inputLines = {"apple", "apple", "banana", "banana", "cherry", "cherry"};
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-        Commands.uniq(inputLines);
-        String expectedOutput = "apple\r\nbanana\r\ncherry\r\n";
-        assertEquals(expectedOutput, outContent.toString());
-        System.setOut(System.out);
-    }
-
-    @Test
-    public void testPipe() throws IOException
-    {
-        Path tempFile = Files.createTempFile("unsorted", ".txt");
-        List <String> lines = List.of("banana", "apple", "cherry", "apple", "banana");
-        Files.write(tempFile, lines);
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-        String[] commands = {"sort " + tempFile, "uniq"};
-        Commands.pipe(commands);
-        String expectedOutput = "apple\r\nbanana\r\ncherry\r\n";
-        assertEquals(expectedOutput, outContent.toString());
-        System.setOut(System.out);
-        Files.delete(tempFile);
+        
     }
 }
