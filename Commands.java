@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.io.*;
@@ -112,8 +111,8 @@ public class Commands
 
     public static void mv(String[] files)
     {
-        Path movedFile = Paths.get(files[1]);
-        Path targetFile = Paths.get(files[2]);
+        Path movedFile = Paths.get(System.getProperty("user.dir"), files[1]);
+        Path targetFile = Paths.get(System.getProperty("user.dir"), files[2]);
         if (!Files.exists(movedFile))
         {
             System.out.println("File does not exist");
@@ -171,17 +170,38 @@ public class Commands
             {
                 System.out.println("Could not read file: " + e.getMessage());
             }
-            System.out.print('\n');
         }
     }
 
-    public static void catWrite(String file)
+    public static void catWrite(String file, Scanner sc)
     {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file)))
         {
             String line;
             System.out.println("Enter text to write to " + file + " (press Ctrl+C , or type 'EOF' to end)");
-            Scanner sc = new Scanner(System.in);
+            while (sc.hasNextLine() && !(line = sc.nextLine()).equals("EOF"))
+            {
+                bw.write(line);
+                bw.newLine();
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println("Could not write into file: " + e.getMessage());
+        }
+    }
+
+    public static void catWrite(String file)
+    {
+        catWrite(file, new Scanner(System.in));
+    }
+
+    public static void catAppend(String file, Scanner sc)
+    {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file,true)))
+        {
+            String line;
+            System.out.println("Enter text to write to " + file + " (press Ctrl+C , or type 'EOF' to end)");
             while (sc.hasNextLine() && !(line = sc.nextLine()).equals("EOF"))
             {
                 bw.write(line);
@@ -196,69 +216,46 @@ public class Commands
 
     public static void catAppend(String file)
     {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file,true)))
-        {
-            String line;
-            System.out.println("Enter text to write to " + file + " (press Ctrl+C , or type 'EOF' to end)");
-            Scanner sc = new Scanner(System.in);
-            while (sc.hasNextLine() && !(line = sc.nextLine()).equals("EOF"))
-            {
-                bw.write(line);
-                bw.newLine();
-            }
-        }
-        catch (IOException e)
-        {
-            System.out.println("Could not write into file: " + e.getMessage());
-        }
-    }
-
-    public static String[] sort(String file)
-    {
-        List <String> lines = new ArrayList <>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file)))
-        {
-            String line;
-            while ((line = reader.readLine()) != null)
-            {
-                lines.add(line);
-            }
-            Collections.sort(lines);
-            return lines.toArray(new String[0]);
-        }
-        catch (IOException e)
-        {
-            return new String[]{"Could not sort the file: " + e.getMessage()};
-        }
-    }
-
-    public static void uniq(String[] lines)
-    {
-        List <String> uniqueLines = new ArrayList <>();
-        for (int i = 0; i < lines.length; i++)
-        {
-            if (i > 0 && !lines[i].equals(lines[i - 1]))
-                uniqueLines.add(lines[i]);
-            else if (i == 0)
-                uniqueLines.add(lines[i]);
-        }
-        for (String line : uniqueLines)
-            System.out.println(line);
+        catAppend(file, new Scanner(System.in));
     }
 
     public static void pipe(String[] commands)
     {
-        String firstCommand = commands[0].trim();
-        String secondCommand = commands[1].trim();
-        if (firstCommand.startsWith("sort"))
+        commands[0] = commands[0].trim();
+        String[] firstCommand = commands[0].split(" ");
+        commands[1] = commands[1].trim();
+        String[] secondCommand = commands[1].split(" ");
+        String[] output = new String[0];
+        if (firstCommand.length == 1)
         {
-            String fileName = firstCommand.split(" ")[1];
-            String[] sortedOutput = Commands.sort(fileName);
-            if (secondCommand.equals("uniq"))
-            {
-                Commands.uniq(sortedOutput);
-            }
+            output = ls();
         }
+        else if (firstCommand[1].equals("-a"))
+        {
+            output = lsA();
+        }
+        else if (firstCommand[1].equals("-r"))
+        {
+            output = lsR();
+        }
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(outContent));
+        for (String line : output)
+        {
+            System.out.println(line);
+        }
+        System.out.println("EOF");
+        Scanner sc = new Scanner(outContent.toString());
+        if (secondCommand[1].equals(">"))
+        {
+            catWrite(secondCommand[2], sc);
+        }
+        else if (secondCommand[1].equals(">>"))
+        {
+            catAppend(secondCommand[2], sc);
+        }
+        System.setOut(originalOut);
     }
 
     public static void help()
@@ -275,8 +272,6 @@ public class Commands
         System.out.println("cat <file>:          Displays contents of a file.");
         System.out.println("> <file>:            Redirects output to a file (overwrite).");
         System.out.println(">> <file>:           Redirects output to a file (append).");
-        System.out.println("sort <file>:         Sorts the contents of a file.");
-        System.out.println("uniq:                Deletes adjacent duplicates in a file.");
         System.out.println("|:                   Pipe operator.");
         System.out.println("help:                Displays this help message.");
         System.out.println("exit:                Exits the CLI.");
